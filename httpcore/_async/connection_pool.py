@@ -202,9 +202,10 @@ class AsyncConnectionPool(AsyncHTTPTransport):
                 )
             except NewConnectionRequired:
                 connection = None
-            except Exception:  # noqa: PIE786
+            except (Exception, BaseException):  # noqa: PIE786
                 logger.trace("remove from pool connection=%r", connection)
                 await self._remove_from_pool(connection)
+                await connection.aclose()
                 raise
 
         status_code, headers, stream, ext = response
